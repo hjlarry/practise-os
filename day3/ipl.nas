@@ -35,20 +35,21 @@ entry:
 		MOV		DS,AX
 
 ; 读取磁盘 
+
 		MOV		AX,0x0820
 		MOV		ES,AX
 		MOV		CH,0			; 柱面0
 		MOV		DH,0			; 磁头0
 		MOV		CL,2			; 扇区2
-
-		MOV		SI,0
+readloop:
+		MOV		SI,0			; 记录失败次数的寄存器
 retry:
 		MOV		AH,0x02			; AH=0x02 : 读入磁盘
 		MOV		AL,1			; 1个扇区
 		MOV		BX,0
 		MOV		DL,0x00			; A驱动器
 		INT		0x13			; 调用磁盘BIOS
-		JNC		fin				; 没出错则跳转到fin
+		JNC		next			; 没出错则跳转到next
 		ADD		SI,1			; 往SI加1
 		CMP		SI,5			; 比较SI与5
 		JAE		error			; SI >= 5 跳转到error
@@ -56,7 +57,21 @@ retry:
 		MOV		DL,0x00			; 重置驱动器
 		INT		0x13
 		JMP		retry
-
+next:
+		MOV		AX,ES			; 把内存地址后移0x200（512/16十六进制转换）
+		ADD		AX,0x0020
+		MOV		ES,AX			; ADD ES,0x020因为没有ADD ES，只能通过AX进行
+		ADD		CL,1			; 往CL里面加1
+		CMP		CL,18			; 比较CL与18
+		JBE		readloop		; CL <= 18 跳转到readloop
+		MOV		CL,1
+		ADD		DH,1
+		CMP		DH,2
+		JB		readloop		; DH < 2 跳转到readloop
+		MOV		DH,0
+		ADD		CH,1
+		CMP		CH,CYLS
+		JB		readloop		; CH < CYLS 跳转到readloop
 fin:
 		HLT						; 让CPU停止，等待指令
 		JMP		fin				; 无限循环
