@@ -1,5 +1,6 @@
-; hello-os
+; haribote-ipl
 ; TAB=4
+CYLS	EQU		10				; 声明CYLS=10
 
 		ORG		0x7c00			; 指明程序装载地址
 
@@ -41,8 +42,10 @@ entry:
 		MOV		CH,0			; 柱面0
 		MOV		DH,0			; 磁头0
 		MOV		CL,2			; 扇区2
+
 readloop:
 		MOV		SI,0			; 记录失败次数的寄存器
+
 retry:
 		MOV		AH,0x02			; AH=0x02 : 读入磁盘
 		MOV		AL,1			; 1个扇区
@@ -72,6 +75,10 @@ next:
 		ADD		CH,1
 		CMP		CH,CYLS
 		JB		readloop		; CH < CYLS 跳转到readloop
+
+; 读取完毕，跳转到haribote.sys执行！
+		MOV		[0x0ff0],CH		; 将CYLS的值写到内存地址0x0ff0中
+		JMP		0xc200
 fin:
 		HLT						; 让CPU停止，等待指令
 		JMP		fin				; 无限循环
