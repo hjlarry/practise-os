@@ -41,12 +41,21 @@ entry:
 		MOV		DH,0			; 磁头0
 		MOV		CL,2			; 扇区2
 
+		MOV		SI,0
+retry:
 		MOV		AH,0x02			; AH=0x02 : 读入磁盘
 		MOV		AL,1			; 1个扇区
 		MOV		BX,0
 		MOV		DL,0x00			; A驱动器
 		INT		0x13			; 调用磁盘BIOS
-		JC		error
+		JNC		fin				; 没出错则跳转到fin
+		ADD		SI,1			; 往SI加1
+		CMP		SI,5			; 比较SI与5
+		JAE		error			; SI >= 5 跳转到error
+		MOV		AH,0x00			; A驱动器
+		MOV		DL,0x00			; 重置驱动器
+		INT		0x13
+		JMP		retry
 
 fin:
 		HLT						; 让CPU停止，等待指令
