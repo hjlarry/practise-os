@@ -8,7 +8,7 @@ void HariMain(void)
     char s[40], mcursor[256], keybuf[32], mousebuf[128];
     int mx, my, i;
     struct MOUSE_DEC mdec;
-    unsigned int memtotal;
+    unsigned int memtotal, count = 0;
     struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
     struct SHTCTL *shtctl;
     struct SHEET *sht_back, *sht_mouse, *sht_win;
@@ -35,15 +35,13 @@ void HariMain(void)
     sht_mouse = sheet_alloc(shtctl);
     sht_win = sheet_alloc(shtctl);
     buf_back = (unsigned char *)memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
-    buf_win = (unsigned char *)memman_alloc_4k(memman, 160 * 68);
+    buf_win = (unsigned char *)memman_alloc_4k(memman, 160 * 52);
     sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1); /* 没有透明色 */
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);                   /* 透明色号99 */
-    sheet_setbuf(sht_win, buf_win, 160, 68, -1);
+    sheet_setbuf(sht_win, buf_win, 160, 52, -1);
     init_screen8(buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8(buf_mouse, 99); /* 背景色号99 */
-    make_window8(buf_win, 160, 68, "window");
-    putfonts8_asc(buf_win, 160, 24, 28, COL8_000000, "Welcome to");
-    putfonts8_asc(buf_win, 160, 24, 44, COL8_000000, "  Haribote-OS!");
+    make_window8(buf_win, 160, 52, "counter");
     sheet_slide(sht_back, 0, 0);
     mx = (binfo->scrnx - 16) / 2; /* 计算画面的中心坐标*/
     my = (binfo->scrny - 28 - 16) / 2;
@@ -60,10 +58,16 @@ void HariMain(void)
 
     for (;;)
     {
+        count++;
+        sprintf(s, "%10d", count);
+        boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
+        putfonts8_asc(buf_win, 160, 40, 28, COL8_000000, s);
+        sheet_refresh(sht_win, 40, 28, 120, 44);
+
         io_cli();
         if (fifo8_status(&keyfifo) + fifo8_status(&mousefifo) == 0)
         {
-            io_stihlt();
+            io_sti();
         }
         else
         {

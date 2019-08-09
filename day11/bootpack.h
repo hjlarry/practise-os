@@ -81,8 +81,8 @@ struct GATE_DESCRIPTOR
 void init_gdtidt(void);
 void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar);
 void set_gatedesc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int ar);
-void load_gdtr(int limit, int addr);
-void load_idtr(int limit, int addr);
+// void load_gdtr(int limit, int addr);
+// void load_idtr(int limit, int addr);
 #define ADR_IDT 0x0026f800
 #define LIMIT_IDT 0x000007ff
 #define ADR_GDT 0x00270000
@@ -153,7 +153,7 @@ int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size);
 struct SHEET
 {
     unsigned char *buf;
-    unsigned int bxsize, bysize, vx0, vy0, col_inv, height, flags;
+    int bxsize, bysize, vx0, vy0, col_inv, height, flags;
     struct SHTCTL *ctl;
 };
 struct SHTCTL
@@ -166,7 +166,6 @@ struct SHTCTL
 struct SHTCTL *shtctl_init(struct MEMMAN *memman, unsigned char *vram, int xsize, int ysize);
 struct SHEET *sheet_alloc(struct SHTCTL *ctl);
 void sheet_setbuf(struct SHEET *sht, unsigned char *buf, int xsize, int ysize, int col_inv);
-void sheet_refreshsub(struct SHTCTL *ctl, int vx0, int vy0, int vx1, int vy1);
 void sheet_updown(struct SHEET *sht, int height);
 void sheet_refresh(struct SHEET *sht, int bx0, int by0, int bx1, int by1);
 void sheet_slide(struct SHEET *sht, int vx0, int vy0);
