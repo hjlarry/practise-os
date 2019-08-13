@@ -16,7 +16,7 @@ void HariMain(void)
     struct MEMMAN *memman = (struct MEMMAN *)MEMMAN_ADDR;
     struct SHTCTL *shtctl;
     struct SHEET *sht_back, *sht_mouse, *sht_win;
-    unsigned char *buf_back, *buf_mouse[256], *buf_win;
+    unsigned char *buf_back, buf_mouse[256], *buf_win;
 
     init_gdtidt();
     init_pic();
