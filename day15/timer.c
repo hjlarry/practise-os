@@ -92,6 +92,7 @@ void timer_settime(struct TIMER *timer, unsigned int timeout)
 void inthandler20(int *esp)
 {
     struct TIMER *timer;
+    char ts = 0;
     io_out8(PIC0_OCW2, 0x60); /* 把IRQ-00信号接收完了的信息通知给PIC */
     timerctl.count++;
     if (timerctl.next > timerctl.count)
@@ -107,10 +108,17 @@ void inthandler20(int *esp)
         }
         /* 超时*/
         timer->flags = TIMER_FLAGS_ALLOC;
-        fifo32_put(timer->fifo, timer->data);
+        if (timer != mt_timer) {
+			fifo32_put(timer->fifo, timer->data);
+		} else {
+			ts = 1; /* mt_timer超时 */
+		}
         timer = timer->next; /* 下一个定时器的地址赋值给timer */
     }
     timerctl.t0 = timer; 
     timerctl.next = timerctl.t0->timeout;
+    if (ts != 0) {
+		mt_taskswitch();
+	}
     return;
 }
